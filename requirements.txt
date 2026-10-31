@@ -1,0 +1,5 @@
+numpy
+pynrrd
+imageio
+imageio-ffmpeg
+pytest
