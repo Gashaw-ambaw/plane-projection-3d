@@ -1,8 +1,16 @@
-import numpy as np
+from pathlib import Path
 
+import numpy as np
+import pytest
+
+from projection.csv_planes import csv_row
+from projection.geometry import normalize_points, validate
 from projection.slicer import slice_volume
-from projection.slicer_slow import slice_slow, validate, normalize_points
-from test_slicer_slow import csv_row
+from projection.slicer_slow import slice_slow
+from projection.volume_loader import load_volume, prepare_volume
+
+DATA = Path(__file__).resolve().parents[1] / "data"
+CSV = DATA / "Ex0.csv"
 
 
 def assert_same_as_slow(M, pts):
@@ -35,7 +43,7 @@ def test_fast_equals_slow_on_csv_row_4_trapezoid():
     # Random volume big enough to contain the whole trapezoid.
     rng = np.random.default_rng(1)
     M = rng.integers(1, 65536, size=(202, 402, 502), dtype=np.uint16)
-    assert_same_as_slow(M, csv_row(4))
+    assert_same_as_slow(M, csv_row(CSV, 4))
 
 
 def test_fast_equals_slow_when_plane_is_partly_outside():
@@ -70,3 +78,43 @@ def test_fast_equals_slow_on_random_tilted_triangles():
             continue  # skip degenerate random triangles
         assert_same_as_slow(M, [a, b, c])
         checked += 1
+
+
+def test_fortran_volume_after_prepare_equals_slow():
+    # A Fortran-ordered volume, once prepared, gives the same image as the slow version.
+    x, y, z = np.indices((10, 10, 10))
+    M = np.asfortranarray(x * 100 + y * 10 + z)
+    pts = [(0, 4, 0), (3, 8, 0), (3, 0, 0)]
+
+    assert not M.flags.c_contiguous
+    assert np.array_equal(slice_volume(prepare_volume(M), pts), slice_slow(M, pts))
+
+
+def test_fortran_volume_without_prepare_raises():
+    # Forgetting prepare_volume must be an error, not a silent slowdown.
+    M = np.asfortranarray(np.zeros((10, 10, 10)))
+    with pytest.raises(ValueError, match="C-contiguous"):
+        slice_volume(M, [(0, 4, 0), (3, 8, 0), (3, 0, 0)])
+
+
+def test_loaded_mrhead_is_c_contiguous_after_prepare():
+    # The NRRD loader returns a Fortran-ordered array; prepare_volume fixes it.
+    M = load_volume(str(DATA / "MRHead_1.nrrd"))
+    assert not M.flags.c_contiguous
+    assert prepare_volume(M).flags.c_contiguous
+
+
+@pytest.mark.parametrize("block_rows", [1, 3, 32])
+def test_block_rows_equal_slow_on_example(block_rows):
+    # Any block size (even one that does not divide the rows) gives the same image.
+    x, y, z = np.indices((10, 10, 10))
+    M = x * 100 + y * 10 + z
+    pts = [(0, 4, 0), (3, 8, 0), (3, 0, 0)]
+    assert np.array_equal(
+        slice_volume(M, pts, block_rows=block_rows), slice_slow(M, pts)
+    )
+
+
+def test_block_rows_below_one_raises():
+    with pytest.raises(ValueError, match="block_rows"):
+        slice_volume(np.zeros((10, 10, 10)), [(0, 4, 0), (3, 8, 0), (3, 0, 0)], block_rows=0)
