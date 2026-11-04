@@ -62,8 +62,8 @@ def slice_slow(M, pts):
     dbc = np.linalg.norm(c - b)
 
     # Image size: one row per step along a-b, one column per step along b-c.
-    rows = int(np.floor(dab))
-    cols = int(np.ceil(dbc))
+    rows = int(np.floor(dab + 1e-9))
+    cols = int(np.ceil(dbc - 1e-9))
     E = np.zeros((rows, cols))
 
     # Unit vectors: moving along them advances exactly one voxel.
