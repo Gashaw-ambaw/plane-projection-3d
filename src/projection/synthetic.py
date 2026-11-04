@@ -2,8 +2,8 @@ import numpy as np
 
 
 def make_ball_volume(size=300, radius=100, background=1000, ball=2000, dtype=np.uint16):
-    """Return a C-contiguous size^3 volume with a ball in the middle of every axis."""
-    center = (size - 1) / 2
+    """Return a C-contiguous size^3 volume with a ball centered on voxel size // 2."""
+    center = size // 2  # 150 for size 300, like the lecturer's example
     M = np.full((size, size, size), background, dtype=dtype)
 
     axis = np.arange(size) - center
@@ -25,7 +25,7 @@ def plane_through_center(normal, size=300, center=None, half_width=120, up=None)
     n = np.asarray(normal, dtype=float)
     n = n / np.linalg.norm(n)
     if center is None:
-        center = np.full(3, (size - 1) / 2)
+        center = np.full(3, size // 2)  # the center of the ball of make_ball_volume
     center = np.asarray(center, dtype=float)
 
     if up is None:

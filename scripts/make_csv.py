@@ -7,6 +7,10 @@ Every row has 4 points (a', b, a'', c). Two modes:
 Example:
   python scripts/make_csv.py rotate --shape 256 256 130 --frames 60 --out data/mrhead_rotate.csv
 Use --bad-row N to make row N an invalid plane (not isosceles), to show an error frame.
+Use --center X Y Z to rotate around another point. The default is the middle of the
+volume, (shape - 1) / 2 (MRHead). For the ball of make_ball.py use --center 150 150 150
+(size // 2 on every axis):
+  python scripts/make_csv.py rotate --shape 300 300 300 --center 150 150 150 --out data/ball_rotate.csv
 """
 import argparse
 import csv
@@ -33,8 +37,9 @@ def sweep_planes(shape, frames):
     ]
 
 
-def rotate_planes(shape, frames, axis):
-    center = (np.array(shape) - 1) / 2
+def rotate_planes(shape, frames, axis, center=None):
+    if center is None:
+        center = (np.array(shape) - 1) / 2
     half_width = np.ceil(np.linalg.norm(shape) / 2)  # half the diagonal covers the volume
     up = np.eye(3)[axis]
     first, second = [i for i in range(3) if i != axis]
@@ -70,6 +75,8 @@ def main(argv=None):
     parser.add_argument("--shape", type=int, nargs=3, required=True, metavar=("SX", "SY", "SZ"))
     parser.add_argument("--frames", type=int, default=60)
     parser.add_argument("--axis", type=int, choices=[0, 1, 2], default=2, help="rotation axis")
+    parser.add_argument("--center", type=float, nargs=3, metavar=("X", "Y", "Z"),
+                        help="rotation center (default: the middle of the volume)")
     parser.add_argument("--bad-row", type=int, help="make this row (1-based) an invalid plane")
     parser.add_argument("--out", required=True)
     args = parser.parse_args(argv)
@@ -79,7 +86,8 @@ def main(argv=None):
     if args.mode == "sweep":
         planes = sweep_planes(args.shape, args.frames)
     else:
-        planes = rotate_planes(args.shape, args.frames, args.axis)
+        center = None if args.center is None else np.array(args.center)
+        planes = rotate_planes(args.shape, args.frames, args.axis, center)
     write_csv(args.out, planes, args.bad_row)
     print(f"wrote {args.out}: {len(planes)} rows, mode {args.mode}, shape {tuple(args.shape)}")
 
