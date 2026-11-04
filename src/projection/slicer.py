@@ -41,10 +41,15 @@ def slice_volume(M, pts):
     # Mask 1: keep only cells that are on the line (0 <= x1 <= d12).
     on_line = (x1 >= 0) & (x1 <= d12[:, None] + 1e-9)
 
-    # Point on the plane for every cell, then its nearest voxel (half rounds up).
-    p = a1_y[:, None, :] + x1[..., None] * dp[:, None, :]  # (rows, cols, 3)
-    v = np.floor(p + 0.5).astype(int)
-    vx, vy, vz = v[..., 0], v[..., 1], v[..., 2]
+    # Point on the plane for every cell, one axis at a time (each is rows x cols).
+    px = a1_y[:, 0][:, None] + x1 * dp[:, 0][:, None]
+    py = a1_y[:, 1][:, None] + x1 * dp[:, 1][:, None]
+    pz = a1_y[:, 2][:, None] + x1 * dp[:, 2][:, None]
+
+    # Nearest voxel on each axis (half rounds up).
+    vx = np.floor(px + 0.5).astype(int)
+    vy = np.floor(py + 0.5).astype(int)
+    vz = np.floor(pz + 0.5).astype(int)
 
     # Mask 2: keep only voxels that are inside the volume.
     inside = (
@@ -56,5 +61,13 @@ def slice_volume(M, pts):
     # Write the volume values into E; every other cell stays 0.
     mask = on_line & inside
     E = np.zeros((rows, cols))
-    E[mask] = M[vx[mask], vy[mask], vz[mask]]
+
+    # One flat index per cell. Cells outside the volume get a wrong index,
+    # but they are never read because the mask removes them first.
+    Sy, Sz = M.shape[1], M.shape[2]
+    idx = vx * Sy * Sz + vy * Sz + vz
+    # NOTE: M must be C-contiguous, or reshape(-1) copies the whole volume
+    # on every call. (The NRRD loader returns a Fortran-ordered array, so
+    # call np.ascontiguousarray(M) once, outside this function.)
+    E[mask] = M.reshape(-1)[idx[mask]]
     return E
