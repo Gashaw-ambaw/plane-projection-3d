@@ -6,3 +6,4 @@ __pycache__/
 .idea/
 notes_tmp.md
 *.mp4
+!docs/experiment/*.mp4
