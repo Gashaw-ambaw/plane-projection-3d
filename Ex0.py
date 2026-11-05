@@ -39,15 +39,18 @@ def check_arguments(argv):
 
 
 def main(argv):
+    # Step 0: check the arguments.
     nrrd_path, csv_path, mp4_path = check_arguments(argv)
 
+    # Step 1: load the volume.
     M = prepare_volume(load_volume(str(nrrd_path)))
     vmax = float(M.max())  # one value for the whole volume (S1-9)
-    print(f"Volume: shape={M.shape}, dtype={M.dtype}, min={M.min()}, max={M.max()}")
+    print(f"Volume: shape={M.shape}, dtype={M.dtype}, min={M.min()}, max={M.dtype.type(vmax)}")
 
+    # Step 2: read the planes (one per CSV row).
     planes = read_planes(csv_path)
 
-    # Pass 1 (cheap): the image size of every valid row, no slicing yet.
+    # Step 3, pass 1 (cheap): the image size of every valid row, no slicing yet.
     shapes = []
     for plane in planes:
         if plane.error:
@@ -58,7 +61,7 @@ def main(argv):
             pass  # reported in pass 2
     canvas = canvas_shape(shapes)
 
-    # Pass 2: one frame per row; frames are written one by one, not kept in memory.
+    # Step 4, pass 2: one frame per row; frames are written one by one, not kept in memory.
     stats = {"slice_time": 0.0, "sliced": 0, "errors": []}
 
     def frames():
@@ -78,11 +81,13 @@ def main(argv):
             stats["errors"].append((number, message))
             yield error_frame(canvas, f"row {number}: {message}")
 
+    # Step 5: write the frames to the mp4 file.
     try:
         count = write_video(frames(), mp4_path, PLAYBACK_FPS)
     except ValueError as e:
         sys.exit(f"could not write the video: {e}")
 
+    # Step 6: print a short summary.
     print(f"Frames written: {count} (errors: {len(stats['errors'])})")
     for number, message in stats["errors"]:
         print(f"  Error in row {number}: {message}")
