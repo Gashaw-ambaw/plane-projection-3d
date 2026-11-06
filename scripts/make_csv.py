@@ -60,11 +60,13 @@ def write_csv(path, planes, bad_row=None):
         for number, pts in enumerate(planes, start=1):
             if number == bad_row:
                 pts = BAD_PLANE
-            else:
-                validate(*normalize_points(pts))  # a generated plane must be valid
             cells = [len(pts)]
             for p in pts:
-                cells.extend(f"{float(x):.3f}".rstrip("0").rstrip(".") for x in p)
+                cells.extend(f"{float(x):.6f}".rstrip("0").rstrip(".") for x in p)
+            if number != bad_row:
+                # Validate the numbers as written (rounded), because the demo reads those.
+                written = [tuple(float(x) for x in cells[1 + 3 * i:4 + 3 * i]) for i in range(len(pts))]
+                validate(*normalize_points(written))  # a generated plane must be valid
             cells.extend([""] * (13 - len(cells)))  # point 4 empty for a triangle
             writer.writerow(cells)
 

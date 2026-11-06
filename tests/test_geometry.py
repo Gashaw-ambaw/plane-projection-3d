@@ -5,6 +5,7 @@ import pytest
 
 from projection.csv_planes import csv_row
 from projection.geometry import normalize_points, output_shape, validate
+from projection.synthetic import plane_through_center
 
 CSV = Path(__file__).resolve().parents[1] / "data" / "Ex0.csv"
 
@@ -84,6 +85,64 @@ def test_validate_rejects_non_coplanar_trapezoid():
     points = [(0, 0, 0), (10, 0, 0), (0, 0, 5), (0, 10, 5)]
     with pytest.raises(ValueError, match="not coplanar"):
         validate(*normalize_points(points))
+
+
+# --- The rules of the lecturer's Q&A, with EPS = 0.001 ---
+
+
+@pytest.mark.parametrize("leg", [10.0009])
+def test_validate_accepts_legs_that_differ_by_less_than_eps(leg):
+    # Dab = 10 and Dac = 10.0009: the difference 0.0009 is below EPS = 0.001.
+    validate(*normalize_points([(0, 0, 0), (10, 0, 0), (0, leg, 0)]))
+
+
+@pytest.mark.parametrize("leg", [10.0011, 10.01])
+def test_validate_rejects_legs_that_differ_by_more_than_eps(leg):
+    # A difference of 0.0011 or 0.01 is above EPS = 0.001 (the old limit 0.5 accepted both).
+    with pytest.raises(ValueError, match="not isosceles"):
+        validate(*normalize_points([(0, 0, 0), (10, 0, 0), (0, leg, 0)]))
+
+
+def test_validate_accepts_a2_slightly_off_the_plane():
+    # a2 is 0.0005 above the plane z = 0 of a1, b, c: below EPS.
+    validate(*normalize_points([(0, 0, 0), (0, 10, 0), (10, 0, 0.0005), (10, 10, 0)]))
+
+
+def test_validate_rejects_a2_off_the_plane_by_more_than_eps():
+    # a2 is 0.002 above the plane z = 0 of a1, b, c: above EPS.
+    with pytest.raises(ValueError, match="not coplanar"):
+        validate(*normalize_points([(0, 0, 0), (0, 10, 0), (10, 0, 0.002), (10, 10, 0)]))
+
+
+def test_validate_rejects_top_base_longer_than_bottom_base():
+    # Legs 5 and 5, but dist(a1, a2) = 10 is larger than dist(b, c) = 4.
+    with pytest.raises(ValueError, match=r"dist\(a1,a2\)"):
+        validate(*normalize_points([(0, 0, 0), (3, 4, 0), (10, 0, 0), (7, 4, 0)]))
+
+
+def test_validate_accepts_square_with_float_noise_in_the_bases():
+    # A square has dist(a1, a2) == dist(b, c), but float noise makes a1-a2 longer by about 1e-14.
+    # The check must not reject it (this plane is one of the ball tests).
+    normal = (-1.2093882869743162, -1.4122920134741184, 0.5415468299050529)
+    a1, a2, b, c = normalize_points(plane_through_center(normal, 300, half_width=120))
+
+    assert np.linalg.norm(a2 - a1) > np.linalg.norm(c - b)  # the noise is really there
+    validate(a1, a2, b, c)
+
+
+def test_lecturer_row_4_is_valid_only_in_our_point_order():
+    # Our order is (a', b, a'', c): legs 502.49 and 502.49.
+    p = csv_row(CSV, 4)
+    validate(*normalize_points(p))
+    # Read as (a1, a2, b, c), the order the Q&A lists them, the legs are 300 and 400.
+    with pytest.raises(ValueError, match="not isosceles"):
+        validate(*normalize_points([p[0], p[2], p[1], p[3]]))
+
+
+@pytest.mark.parametrize("bad", [float("nan"), float("inf")])
+def test_validate_rejects_a_coordinate_that_is_not_finite(bad):
+    with pytest.raises(ValueError, match="not a finite number"):
+        validate(*normalize_points([(bad, 0, 0), (10, 0, 0), (0, 10, 0)]))
 
 
 def test_output_shape_triangle():

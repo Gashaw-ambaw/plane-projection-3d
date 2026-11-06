@@ -1,10 +1,12 @@
 import numpy as np
 
+EPS = 0.001  # tolerance of the lecturer's Q&A (sections 1 and 3)
+
 
 def normalize_points(pts):
     """Accepts 3 or 4 points, returns a1, a2, b, c as float arrays."""
-    # NOTE: the trapezoid point order (a', b, a'', c) is our assumption;
-    # it has not been verified with the lecturer.
+    # NOTE: the trapezoid point order (a', b, a'', c) is our assumption, not confirmed with
+    # the lecturer. Evidence: row 4 of the lecturer's CSV has equal legs only in this order.
     if len(pts) == 3:
         a, b, c = pts
         a1 = a2 = a
@@ -22,16 +24,24 @@ def normalize_points(pts):
 
 
 def validate(a1, a2, b, c):
-    """Check that the points make a valid plane, or raise ValueError (S1-8)."""
+    """Check that the points make a valid plane, or raise ValueError (S1-8).
+
+    Rules from the lecturer's Q&A (EPS = 0.001): equal legs, dist(a1, a2) <= dist(b, c),
+    and the four points on one plane. Two more rules are ours: Dab of at least 1 voxel
+    and a1, b, c not on one line.
+    """
+    if not all(np.all(np.isfinite(p)) for p in (a1, a2, b, c)):
+        raise ValueError("a coordinate is not a finite number")
+
     u = b - a1
     dab = np.linalg.norm(u)
     if dab < 1:
         raise ValueError(f"Dab = {dab:.3f} is smaller than 1 voxel")
 
     dac = np.linalg.norm(c - a2)
-    if abs(dab - dac) > 0.5:
+    if not abs(dab - dac) < EPS:
         raise ValueError(
-            f"not isosceles: Dab = {dab:.2f}, Dac = {dac:.2f} (difference above 0.5)"
+            f"not isosceles: Dab = {dab:.4f}, Dac = {dac:.4f} (difference not below {EPS})"
         )
 
     # u x v is perpendicular to the plane of a1, b, c; its length is the
@@ -39,16 +49,25 @@ def validate(a1, a2, b, c):
     v = c - a1
     n = np.cross(u, v)
     dist_to_line = np.linalg.norm(n) / dab  # distance of c from the line a1-b
-    if dist_to_line < 0.5:
+    if dist_to_line < 0.5:  # our rule, not in the Q&A
         raise ValueError(
             f"a1, b, c are on one line (c is {dist_to_line:.3f} from the line a1-b)"
         )
 
     w = a2 - a1
     dist_to_plane = abs(np.dot(w, n)) / np.linalg.norm(n)  # distance of a2 from the plane
-    if dist_to_plane > 0.5:
+    if not dist_to_plane < EPS:
         raise ValueError(
-            f"the 4 points are not coplanar (a2 is {dist_to_plane:.3f} from the plane)"
+            f"the 4 points are not coplanar (a2 is {dist_to_plane:.4f} from the plane)"
+        )
+
+    # The + EPS is needed: for a square the two bases are equal, and float noise
+    # (about 1e-14) can make dist(a1, a2) a little longer than dist(b, c).
+    d_top = np.linalg.norm(w)
+    d_bottom = np.linalg.norm(c - b)
+    if d_top > d_bottom + EPS:
+        raise ValueError(
+            f"dist(a1,a2) = {d_top:.2f} is longer than dist(b,c) = {d_bottom:.2f}"
         )
 
 

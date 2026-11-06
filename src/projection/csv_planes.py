@@ -8,8 +8,9 @@ Plane = namedtuple("Plane", ["points", "error"])
 def read_planes(path):
     """Read the planes CSV (header skipped) and return one Plane per data row.
 
-    A row that cannot be read is kept as Plane(None, message) and does not stop
-    the other rows from being read.
+    Blank lines and comment lines (first cell starts with '#') are skipped, so rows are
+    counted without them. A row that cannot be read is kept as Plane(None, message) and
+    does not stop the other rows from being read.
     """
     planes = []
     with open(path, newline="") as f:
@@ -18,6 +19,8 @@ def read_planes(path):
         for row in reader:
             if not any(cell.strip() for cell in row):
                 continue  # blank line
+            if row[0].strip().startswith("#"):
+                continue  # comment line
             planes.append(_parse_row(row))
     return planes
 

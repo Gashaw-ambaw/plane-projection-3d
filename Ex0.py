@@ -8,6 +8,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent / "src"))
 
+from projection import slicer  # noqa: E402
 from projection.csv_planes import read_planes  # noqa: E402
 from projection.geometry import output_shape  # noqa: E402
 from projection.slicer import slice_volume  # noqa: E402
@@ -23,6 +24,8 @@ from projection.volume_loader import load_volume, prepare_volume  # noqa: E402
 PLAYBACK_FPS = 30  # speed of the output video, not related to the slicing speed
 MAX_ERROR_CHARS = 200
 USAGE = "usage: python Ex0.py file.nrrd file.csv file.mp4"
+# A small valid triangle (Dab = Dac = 4) used only for the warm-up.
+WARM_UP_PLANE = [(0, 0, 0), (4, 0, 0), (0, 4, 0)]
 
 
 def check_arguments(argv):
@@ -36,6 +39,15 @@ def check_arguments(argv):
     if not mp4_path.resolve().parent.is_dir():
         sys.exit(f"output folder does not exist: {mp4_path.resolve().parent}\n{USAGE}")
     return nrrd_path, csv_path, mp4_path
+
+
+def _warm_up(volume):
+    """Compile the Numba kernel for this volume's dtype before the timed loop (nothing to do without Numba)."""
+    # Warm-up: Numba compiles the kernel on its first call (0.2 to 1.6 s, per dtype).
+    # Calling it once here, outside the timed loop, keeps the printed FPS about the slicing only.
+    # The result is discarded.
+    if slicer.HAVE_NUMBA:
+        slice_volume(volume, WARM_UP_PLANE)
 
 
 def main(argv):
@@ -60,6 +72,9 @@ def main(argv):
         except ValueError:
             pass  # reported in pass 2
     canvas = canvas_shape(shapes)
+
+    # Step 3b: warm up the slicer, so its compile time is not in the printed FPS.
+    _warm_up(M)
 
     # Step 4, pass 2: one frame per row; frames are written one by one, not kept in memory.
     stats = {"slice_time": 0.0, "sliced": 0, "errors": []}
