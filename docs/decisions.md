@@ -28,3 +28,6 @@
 - Trapezoid point order in the CSV: not confirmed with the lecturer. The Q&A lists `(a1, a2, b, c)`, but only our order `(a', b, a'', c)` fits his own `lecturer_example.csv`: row 4 has legs 502.49 and 502.49 in our order, 300 and 400 in the listed order (MEASURED).
 - Signed `int16` data versus the assignment's unsigned values.
 - Array indices versus millimetres.
+- Coplanarity threshold: the Q&A gives no number; `EPS = 0.001` is our reading (item 9).
+- Maximum image size: not handled. A plane with a huge image (frame 16 of the lecturer's `edge_cases.csv`: 5102 x 10199) makes the video encoder fail.
+- Volume size limit `1 <= sx,sy,sz < 2^10` of the assignment: not checked by `load_volume`.

@@ -8,3 +8,4 @@
 - הרצת בדיקות: .venv\Scripts\python.exe -m pytest
 - commit שנעזר ב-Claude מסומן "AI-assisted (Claude)".
 - נוסח המטלה וה-Q&A של המרצה נמצאים בקובץ הפרטי assignment_private.md (ב-.gitignore, לא ב-repo).
+- לפני כל בדיקת מהירות, FPS או ביצועים: לעדכן את המשתמש מראש כדי שיסגור טאבים, ולבדוק עומס CPU (מעל 30% - לדווח ולחכות).
