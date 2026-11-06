@@ -4,3 +4,4 @@ imageio
 imageio-ffmpeg
 Pillow
 pytest
+numba

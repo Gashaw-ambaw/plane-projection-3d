@@ -12,7 +12,11 @@ import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
+from projection import slicer  # noqa: E402
 from projection.slicer import slice_volume  # noqa: E402
+
+# benchmarks.md describes the NumPy version, so force it (bench_numba.py compares both paths).
+slicer.HAVE_NUMBA = False
 
 ROUNDS = 5
 SLICES = 10

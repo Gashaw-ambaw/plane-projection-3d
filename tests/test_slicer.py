@@ -12,6 +12,8 @@ from projection.volume_loader import load_volume, prepare_volume
 DATA = Path(__file__).resolve().parents[1] / "data"
 CSV = DATA / "Ex0.csv"
 
+pytestmark = pytest.mark.usefixtures("slicer_path")  # every test runs with Numba and with NumPy
+
 
 def assert_same_as_slow(M, pts):
     # The fast and the slow version must give exactly the same image.

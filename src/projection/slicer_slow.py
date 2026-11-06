@@ -1,3 +1,8 @@
+"""Slow reference version of the slicer: plain loops, one pixel at a time.
+
+It follows the assignment closely, so it is easy to check by hand. The demo does not use it.
+The tests compare the fast versions (NumPy and Numba) with it and require the same image.
+"""
 import numpy as np
 
 from projection.geometry import normalize_points, output_shape
@@ -8,6 +13,7 @@ def slice_slow(M, pts):
     a1, a2, b, c = normalize_points(pts)
     rows, cols = output_shape(pts)  # also validates the plane
 
+    # Side lengths: Dab and Dac are the two equal sides, Dbc is the base.
     dab = np.linalg.norm(b - a1)
     dac = np.linalg.norm(c - a2)
     dbc = np.linalg.norm(c - b)

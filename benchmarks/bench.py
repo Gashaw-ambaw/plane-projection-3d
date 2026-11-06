@@ -7,8 +7,12 @@ import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
+from projection import slicer  # noqa: E402
 from projection.slicer import slice_volume  # noqa: E402
 from projection.slicer_slow import slice_slow  # noqa: E402
+
+# These numbers are for the NumPy version (block_rows has no effect on the Numba one).
+slicer.HAVE_NUMBA = False
 
 RUNS = 20
 BLOCK_ROWS = [8, 16, 32, 64, 128]

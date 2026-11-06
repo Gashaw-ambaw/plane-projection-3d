@@ -17,6 +17,9 @@ from projection.volume_loader import load_volume, prepare_volume
 
 DATA = Path(__file__).resolve().parents[1] / "data"
 
+pytestmark = pytest.mark.usefixtures("slicer_path")  # every test runs with Numba and with NumPy
+
+
 SIZE = 300
 RADIUS = 100
 BALL = 2000
@@ -142,7 +145,7 @@ def test_ball_width_is_two_r(ball_volume, normal):
         # Rectangle: Dab = 4, Dbc = 5.2.
         [(0, 0, 0), (4, 0, 0), (0, 5.2, 0), (4, 5.2, 0)],
         # Isosceles triangle: Dab = Dac = 5, Dbc = 5.2.
-        [(0, 0, 0), (5, 0, 0), (2.296, 4.44, 0)],
+        [(0, 0, 0), (5, 0, 0), (2.296, 4.441665, 0)],
     ],
 )
 def test_non_whole_dbc_gives_ceil_columns_and_equals_slow(pts):
