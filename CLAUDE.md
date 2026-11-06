@@ -7,3 +7,4 @@
 - לא לכתוב הערכות שלא נמדדו כאילו נמדדו.
 - הרצת בדיקות: .venv\Scripts\python.exe -m pytest
 - commit שנעזר ב-Claude מסומן "AI-assisted (Claude)".
+- נוסח המטלה וה-Q&A של המרצה נמצאים בקובץ הפרטי assignment_private.md (ב-.gitignore, לא ב-repo).

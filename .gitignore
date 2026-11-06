@@ -7,3 +7,5 @@ __pycache__/
 notes_tmp.md
 *.mp4
 !docs/experiment/*.mp4
+out_examples/
+assignment_private.md
