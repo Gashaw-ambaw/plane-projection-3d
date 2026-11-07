@@ -6,8 +6,9 @@
 #   powershell -ExecutionPolicy Bypass -File .\scripts\run_examples.ps1 -Drive "C:\path\to\the\unzipped\folder"
 # The folder must hold the .nrrd files and a csv\ subfolder with the lecturer's CSV files
 # (they are not in this repo).
-# Add -IncludeEdgeCases to also run edge_cases.csv (a robustness check; with the current code
-# its frame 16, a plane with 10200 columns, makes the video encoder fail).
+# Add -IncludeEdgeCases to also run edge_cases.csv (a robustness check; its frame 16, a plane
+# with a 5102 x 10199 image, is above the image size limit of 2048 per side and becomes an
+# error frame, so the video is still written).
 #
 # Writes one mp4 per pair into out_examples\ in the repo root (ignored by git, see .gitignore).
 param(

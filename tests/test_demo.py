@@ -5,6 +5,7 @@ from pathlib import Path
 
 import imageio.v2 as imageio
 import numpy as np
+import pytest
 
 from projection.csv_planes import read_planes
 
@@ -66,6 +67,29 @@ def test_demo_skips_comment_lines_and_numbers_rows_without_them(tmp_path):
     assert len(imageio.mimread(str(mp4), memtest=False)) == 2
 
 
+HEADER = "Number of Points (3 or 4),x1,y1,z1,x2,y2,z2,x3,y3,z3,x4,y4,z4\n"
+SMALL_ROW = "3,200,200,0,0,200,400,400,200,400,,,\n"
+HUGE_ROW = "3,99.5,0,80,-5000,179,80,5199,179,80,,,\n"  # a valid plane, image 5102 x 10199
+
+
+def test_demo_gives_a_too_large_plane_an_error_frame_and_keeps_the_canvas_small(tmp_path):
+    csv_path = tmp_path / "edge_like.csv"
+    csv_path.write_text(
+        HEADER + "# a comment\n" + SMALL_ROW + HUGE_ROW + "\n# another comment\n" + SMALL_ROW
+    )
+    mp4 = tmp_path / "out.mp4"
+    result = run_demo(NRRD, csv_path, mp4)
+
+    assert result.returncode == 0, result.stderr
+    assert "Frames written: 3 (errors: 1)" in result.stdout
+    assert "Error in row 2: image too large: 5102 x 10199, maximum 2048 per side" in result.stdout
+    # The rejected row does not enlarge the canvas: it is the size of the small planes (447 x 400, made even).
+    assert "Canvas: 448 rows x 400 cols" in result.stdout
+    frames = imageio.mimread(str(mp4), memtest=False)
+    assert len(frames) == 3
+    assert {f.shape for f in frames} == {(448, 400, 3)}
+
+
 def test_demo_prints_volume_info_and_slicing_fps(tmp_path):
     result = run_demo(NRRD, CSV, tmp_path / "out.mp4")
 
@@ -121,6 +145,38 @@ def test_warm_up_plane_is_valid_and_works_on_the_real_slicer():
     ex0._warm_up(M)  # must not raise
     E = ex0.slice_volume(M, ex0.WARM_UP_PLANE)
     assert E.shape == (4, 6)  # Dab = 4 rows, Dbc = 5.66 gives 6 columns
+
+
+def run_main_with_fake_writer(monkeypatch, tmp_path, fake_write_video):
+    ex0 = load_ex0()
+    monkeypatch.setattr(ex0, "write_video", fake_write_video)
+    mp4 = tmp_path / "out.mp4"
+    with pytest.raises(SystemExit) as stop:
+        ex0.main(["Ex0.py", str(NRRD), str(CSV), str(mp4)])
+    return stop.value.code, mp4
+
+
+def test_demo_exits_with_a_message_and_leaves_no_mp4_when_the_encoder_fails(monkeypatch, tmp_path):
+    def failing_write_video(frames, path, fps):
+        path.write_bytes(b"half written")  # what ffmpeg leaves behind
+        raise OSError("[Errno 22] Invalid argument\n\nFFMPEG STDERR OUTPUT:\nInvalid buffer size")
+
+    code, mp4 = run_main_with_fake_writer(monkeypatch, tmp_path, failing_write_video)
+
+    assert isinstance(code, str) and "could not write the video" in code
+    assert "FFMPEG STDERR OUTPUT" in code  # ffmpeg's own text is shown
+    assert not mp4.exists()
+
+
+def test_demo_treats_an_empty_output_file_as_a_failure(monkeypatch, tmp_path):
+    def silent_write_video(frames, path, fps):
+        path.write_bytes(b"")  # ffmpeg exits at once, nothing is written, no exception (size above 16384)
+        return 4
+
+    code, mp4 = run_main_with_fake_writer(monkeypatch, tmp_path, silent_write_video)
+
+    assert isinstance(code, str) and "could not write the video" in code
+    assert not mp4.exists()
 
 
 def test_demo_with_a_missing_argument_fails():

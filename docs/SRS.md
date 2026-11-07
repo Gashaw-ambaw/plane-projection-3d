@@ -23,7 +23,7 @@
 | REQ-02 | The system shall read a CSV with a header and one plane per row (3 or 4 points), skipping blank lines and lines whose first cell starts with `#`. | `test_csv_planes.py` |
 | REQ-03 | The system shall accept a plane only if `abs(Dab-Dac) < EPS`, `dist(a',a'') <= Dbc + EPS`, `a''` is within `EPS` of the plane of `a',b,c`, all coordinates are finite, `Dab >= 1`, and `a',b,c` are not on one line (distance of `c` from the line `a'b` at least 0.5). | `test_geometry.py` |
 | REQ-04 | The system shall raise a `ValueError` for an invalid plane, and an invalid row shall not stop the processing of the other rows. | `test_geometry.py`, `test_csv_planes.py`, `test_demo.py` |
-| REQ-05 | The system shall produce an image of `floor(Dab)` rows and `ceil(Dbc)` columns. | `test_geometry.py`, `test_slicer.py`, `test_ball.py` |
+| REQ-05 | The system shall produce an image of `floor(Dab)` rows and `ceil(Dbc)` columns. An image side above `MAX_IMAGE_SIDE = 2048` makes the plane invalid (error frame); the limit is our own choice, see [decisions.md](decisions.md), item 9. | `test_geometry.py`, `test_slicer.py`, `test_ball.py` |
 | REQ-06 | The system shall set each pixel to the voxel nearest to its position (`floor(p+0.5)` per axis) and to 0 where the position is outside the volume. | `test_slicer_slow.py`, `test_slicer.py`, `test_ball.py` |
 | REQ-07 | The system shall treat a triangle as a trapezoid with `a' = a''`. | `test_geometry.py` |
 | REQ-08 | The command `python Ex0.py file.nrrd file.csv file.mp4` shall write an mp4 with one frame per data row, in CSV order, and shall exit with a message when an argument or an input file is missing. | `test_demo.py` |
@@ -45,4 +45,4 @@
 | NFR-02 | Every slicer (Numba, NumPy) shall return an image equal (`np.array_equal`) to the slow reference. | `test_slicer.py`, `test_slicer_paths.py`, `test_ball.py` |
 | NFR-03 | The system shall run on Python 3.13 without Numba, with the same images. | `test_slicer_paths.py`; the NumPy path alone can fall below 30 FPS under load (benchmarks.md) |
 
-Open points (point order, coplanarity threshold, maximum image size, volume size limit): see "Open" in [decisions.md](decisions.md).
+Open points (point order, coplanarity threshold, volume size limit): see "Open" in [decisions.md](decisions.md).

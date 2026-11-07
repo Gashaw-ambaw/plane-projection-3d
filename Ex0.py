@@ -99,8 +99,17 @@ def main(argv):
     # Step 5: write the frames to the mp4 file.
     try:
         count = write_video(frames(), mp4_path, PLAYBACK_FPS)
-    except ValueError as e:
-        sys.exit(f"could not write the video: {e}")
+        if mp4_path.stat().st_size == 0:  # ffmpeg can fail without an exception (a side above 16384)
+            raise OSError("the encoder wrote an empty file")
+    except (OSError, ValueError) as e:
+        # write_video has already closed the writer (its finally block), so on Windows the
+        # half-written file can be deleted: a truncated mp4 would look like a good result.
+        message = f"could not write the video: {e}"
+        try:
+            mp4_path.unlink(missing_ok=True)
+        except OSError:
+            message += f"\n(the partial file {mp4_path} could not be deleted)"
+        sys.exit(message)
 
     # Step 6: print a short summary.
     print(f"Frames written: {count} (errors: {len(stats['errors'])})")

@@ -27,6 +27,13 @@ def test_slice_volume_output_shape():
     assert E.shape == (5, 8)
 
 
+def test_slice_volume_rejects_an_image_that_is_too_large():
+    # The check runs before the image is allocated (a 5102 x 10199 float image would be 397 MB).
+    M = np.zeros((10, 10, 10))
+    with pytest.raises(ValueError, match="image too large: 5102 x 10199, maximum 2048 per side"):
+        slice_volume(M, [(99.5, 0, 80), (-5000, 179, 80), (5199, 179, 80)])
+
+
 def test_fast_equals_slow_on_our_example():
     # M[x, y, z] = x*100 + y*10 + z, so every voxel value tells its position.
     x, y, z = np.indices((10, 10, 10))

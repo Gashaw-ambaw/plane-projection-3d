@@ -1,6 +1,9 @@
 import numpy as np
 
 EPS = 0.001  # tolerance of the lecturer's Q&A (sections 1 and 3)
+# Largest image side (rows or columns) we accept. Our own rule, not in the assignment: it keeps the
+# video canvas and the H.264 encoder safe (see decisions.md, item 9).
+MAX_IMAGE_SIDE = 2048
 
 
 def normalize_points(pts):
@@ -74,7 +77,8 @@ def validate(a1, a2, b, c):
 def output_shape(pts):
     """Return (rows, cols) of the image for the plane in pts (S1-3, S1-4).
 
-    It also validates the plane, so invalid input raises ValueError here.
+    It also validates the plane, so invalid input raises ValueError here, and so does an image
+    with more than MAX_IMAGE_SIDE rows or columns.
     """
     a1, a2, b, c = normalize_points(pts)
     validate(a1, a2, b, c)
@@ -85,4 +89,6 @@ def output_shape(pts):
     # The 1e-9 stops float noise from adding an extra row or column.
     rows = int(np.floor(dab + 1e-9))
     cols = int(np.ceil(dbc - 1e-9))
+    if rows > MAX_IMAGE_SIDE or cols > MAX_IMAGE_SIDE:
+        raise ValueError(f"image too large: {rows} x {cols}, maximum {MAX_IMAGE_SIDE} per side")
     return rows, cols

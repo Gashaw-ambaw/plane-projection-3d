@@ -27,7 +27,7 @@ To rebuild the videos of the table below for the lecturer's volumes, which are n
 Windows 11, Python 3.13.17 (developed and tested there). Packages (unpinned, `requirements.txt`): numpy, pynrrd, imageio, imageio-ffmpeg, Pillow, pytest, numba. ffmpeg comes with `imageio-ffmpeg`. Numba is optional: without it a NumPy version gives identical images, slower. There are no environment variables or config files; the video plays at 30 FPS.
 
 ## Tests
-`python -m pytest` (270 tests, 13 to 21 s). Strategy and test table: [docs/testing.md](docs/testing.md).
+`python -m pytest` (279 tests, 18 to 21 s). Strategy and test table: [docs/testing.md](docs/testing.md).
 
 ## Structure
 - `Ex0.py` - the demo (CLI)
@@ -36,9 +36,9 @@ Windows 11, Python 3.13.17 (developed and tested there). Packages (unpinned, `re
 - `data/` - `MRHead_1.nrrd` (256x256x130, int16), `ball.nrrd` (300^3, uint16, ball of radius 100), `Ex0.csv` (same content as the lecturer's `lecturer_example.csv`), `ball_rotate.csv`, `mrhead_rotate.csv`, `mrhead_sweep.csv`
 
 ## Docs and supplementary material
-[SRS](docs/SRS.md) - [algorithm](docs/algorithm.md) - [decisions](docs/decisions.md) - [testing](docs/testing.md) - [benchmarks](benchmarks/benchmarks.md) - [AI usage](AI_USAGE.md)
+[SRS](docs/SRS.md) - [algorithm](docs/algorithm.md) - [decisions](docs/decisions.md) - [testing](docs/testing.md) - [data](docs/data.md) - [experiment](docs/experiment/README.md) - [benchmarks](benchmarks/benchmarks.md) - [AI usage](AI_USAGE.md)
 
-Speed: requirement 30 FPS, about 100 expected on a 500^3 volume. The FPS column below is slicing only, Numba path, clean runs of 2026-11-06 with CPU below 30%. The machine is noisy (a few percent to tens of percent); the history is in [benchmarks](benchmarks/benchmarks.md).
+Speed: requirement 30 FPS, about 100 expected on a 500^3 volume. The FPS column below is slicing only, Numba path, clean runs of 2026-11-06 with CPU below 30%; setup, method and limits are in [docs/experiment/README.md](docs/experiment/README.md). The machine is noisy (a few percent to tens of percent); the history is in [benchmarks](benchmarks/benchmarks.md).
 
 Videos (click a picture to open the mp4; GitHub does not play mp4 inside a README):
 
@@ -55,7 +55,7 @@ Videos (click a picture to open the mp4; GitHub does not play mp4 inside a READM
 | <a href="docs/experiment/croissant__croissant.mp4"><img src="docs/experiment/previews/croissant__croissant.png" width="140"></a> | croissant (500^3) | lecturer `croissant.csv` | 100 | 0 | 304 to 352 |
 
 ## Open issues
-Not yet confirmed or handled: the 4-point order, the coplanarity threshold, the maximum image size and the volume size limit. The list is in the "Open" section of [docs/decisions.md](docs/decisions.md).
+Not yet confirmed or handled: the 4-point order, the coplanarity threshold and the volume size limit. The list is in the "Open" section of [docs/decisions.md](docs/decisions.md).
 
 ## AI use and contact
 AI assistance is logged in [AI_USAGE.md](AI_USAGE.md); commits made with it are marked "AI-assisted (Claude)". Author: Gashaw (GitHub: Gashaw-ambaw).

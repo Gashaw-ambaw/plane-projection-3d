@@ -14,7 +14,7 @@ CSV  -> read_planes --------------------+-> per plane: validate -> image size ->
 
 1. **Load.** pynrrd reads the file (must be 3D, `M[x, y, z]`). `prepare_volume` makes the array C-contiguous once, so `slice_volume` never copies per frame.
 2. **Read planes.** Each row is `n, x1,y1,z1, ...` with `n` = 3 or 4. An unreadable row is kept as an error and does not stop the others. Order with 4 points: `(a', b, a'', c)`. With 3 points `a' = a'' = a`.
-3. **Validate.** `Dab = |b - a'|`, `Dac = |c - a''|`, `Dbc = |c - b|`. With `EPS = 0.001` (the lecturer's Q&A), required: `|Dab - Dac| < EPS`, `|a'a''| <= Dbc + EPS`, `a''` on the plane of `a', b, c` (within `EPS`). Our own rules: `Dab >= 1`, `a', b, c` not on one line, all numbers finite. Otherwise `ValueError`.
+3. **Validate.** `Dab = |b - a'|`, `Dac = |c - a''|`, `Dbc = |c - b|`. With `EPS = 0.001` (the lecturer's Q&A), required: `|Dab - Dac| < EPS`, `|a'a''| <= Dbc + EPS`, `a''` on the plane of `a', b, c` (within `EPS`). Our own rules: `Dab >= 1`, `a', b, c` not on one line, all numbers finite. Otherwise `ValueError`. An image side above `MAX_IMAGE_SIDE = 2048` is also an invalid plane (error frame); the limit is our own choice, see decision 9.
 4. **Image size.** `rows = floor(Dab + 1e-9)`, `cols = ceil(Dbc - 1e-9)`. The `1e-9` only absorbs float noise (e.g. `7.999999999999999`).
 5. **Slice** (below).
 6. **Video** (`Ex0.py`, two passes). Pass 1 computes all sizes; the canvas is the largest rows and columns, rounded up to even. Pass 2 slices each plane, scales `0..max(M)` to `0..255` (one maximum for the whole volume), centers the image on a black canvas and writes it at 30 FPS. A bad row gives a black frame with the error text.

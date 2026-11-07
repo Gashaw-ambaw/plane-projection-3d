@@ -159,3 +159,37 @@ def test_output_shape_rejects_invalid_plane():
     # output_shape also validates, so CSV row 3 (not isosceles) must raise.
     with pytest.raises(ValueError, match="not isosceles"):
         output_shape(csv_row(CSV, 3))
+
+
+# --- The image size limit: 2048 rows and 2048 columns at most (our own rule, one constant) ---
+
+
+def tall_rectangle(rows):
+    # Dab = Dac = rows, Dbc = 10: an image of `rows` rows and 10 columns.
+    return [(0, 0, 0), (0, rows, 0), (10, 0, 0), (10, rows, 0)]
+
+
+def wide_rectangle(cols):
+    # Dab = Dac = 10, Dbc = cols: an image of 10 rows and `cols` columns.
+    return [(0, 0, 0), (0, 10, 0), (cols, 0, 0), (cols, 10, 0)]
+
+
+def test_output_shape_accepts_the_largest_image_side():
+    assert output_shape(tall_rectangle(2048)) == (2048, 10)
+    assert output_shape(wide_rectangle(2048)) == (10, 2048)
+
+
+def test_output_shape_rejects_too_many_rows():
+    with pytest.raises(ValueError, match="image too large: 2049 x 10, maximum 2048 per side"):
+        output_shape(tall_rectangle(2049))
+
+
+def test_output_shape_rejects_too_many_columns():
+    with pytest.raises(ValueError, match="image too large: 10 x 2049, maximum 2048 per side"):
+        output_shape(wide_rectangle(2049))
+
+
+def test_output_shape_rejects_the_huge_plane_of_edge_cases_frame_16():
+    # Frame 16 of the lecturer's edge_cases.csv: a valid plane with a 5102 x 10199 image.
+    with pytest.raises(ValueError, match="image too large: 5102 x 10199, maximum 2048 per side"):
+        output_shape([(99.5, 0, 80), (-5000, 179, 80), (5199, 179, 80)])
