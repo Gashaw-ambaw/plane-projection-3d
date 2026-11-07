@@ -7,6 +7,8 @@ Ex1 (Introduction to Software Engineering, Ariel University): cuts a 3D volume (
 **In scope:** NRRD input, the two plane types, validation, the video demo, speed of at least 30 FPS (about 100 expected) on a 500^3 volume. **Out of scope:** voxel spacing in mm (indices are used), interpolation, a GUI, other file formats.
 
 ## Quick start (Windows PowerShell, Python 3.13)
+Get the project first: `git clone https://github.com/Gashaw-ambaw/plane-projection-3d` and open PowerShell inside the `plane-projection-3d` folder (or on GitHub: Code, Download ZIP, unzip, and open PowerShell in that folder).
+
 ```
 py -m venv .venv
 .venv\Scripts\Activate.ps1
@@ -14,6 +16,8 @@ pip install -r requirements.txt
 python -m pytest
 python Ex0.py data/MRHead_1.nrrd data/Ex0.csv out.mp4
 ```
+If activation fails with "running scripts is disabled", run once: `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned`.
+
 The demo prints the volume, the number of frames, the errors and the FPS of slicing only (the Numba compile is excluded). For `Ex0.csv` it writes 4 frames and reports 1 error (row 3 is not isosceles).
 
 ## Usage
