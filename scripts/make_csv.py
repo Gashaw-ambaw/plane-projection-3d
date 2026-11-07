@@ -1,4 +1,4 @@
-"""Generate a planes CSV in the project format (see docs/decisions.md D4).
+"""Generate a planes CSV in the project format, decision 4 (docs/decisions.md).
 
 Every row has 4 points (a', b, a'', c). Two modes:
   sweep   planes with constant z, moving from z=0 to z=sz-1

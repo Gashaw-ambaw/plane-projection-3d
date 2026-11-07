@@ -31,7 +31,7 @@ def test_demo_writes_one_frame_per_csv_row(tmp_path):
 
     frames = imageio.mimread(str(mp4), memtest=False)
     assert len(frames) == len(read_planes(CSV))
-    # Every frame has the same even size (S1-10).
+    # Every frame has the same even size: decision 11 (docs/decisions.md).
     sizes = {f.shape for f in frames}
     assert len(sizes) == 1
     height, width, _ = sizes.pop()

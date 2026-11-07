@@ -56,7 +56,7 @@ def main(argv):
 
     # Step 1: load the volume.
     M = prepare_volume(load_volume(str(nrrd_path)))
-    vmax = float(M.max())  # one value for the whole volume (S1-9)
+    vmax = float(M.max())  # one value for the whole volume: decision 11 (docs/decisions.md)
     print(f"Volume: shape={M.shape}, dtype={M.dtype}, min={M.min()}, max={M.dtype.type(vmax)}")
 
     # Step 2: read the planes (one per CSV row).

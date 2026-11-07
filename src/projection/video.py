@@ -4,7 +4,7 @@ from PIL import Image, ImageDraw, ImageFont
 
 
 def normalize_to_uint8(E, vmax):
-    """Scale E from 0..vmax to 0..255 (S1-9) and return a uint8 array."""
+    """Scale E from 0..vmax to 0..255 (decision 11, docs/decisions.md) and return a uint8 array."""
     if vmax <= 0:
         return np.zeros(E.shape, dtype=np.uint8)
     # Float on purpose: multiplying a uint16 array by 255 would overflow silently.
@@ -13,7 +13,7 @@ def normalize_to_uint8(E, vmax):
 
 
 def canvas_shape(shapes):
-    """Return the (rows, cols) canvas that fits every shape, with even sides (S1-10)."""
+    """Return the (rows, cols) canvas that fits every shape, with even sides (decision 11, docs/decisions.md)."""
     shapes = list(shapes)
     if not shapes:
         return (256, 256)

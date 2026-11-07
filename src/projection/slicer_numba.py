@@ -14,7 +14,7 @@ def fill_image(M, E, a1, a2, dir1, dir2, dbc):
     sx, sy, sz = M.shape
 
     for y in range(rows):
-        # Both anchors after k steps (step first, then sample, S1-2).
+        # Both anchors after k steps (step first, then sample: decision 6, docs/decisions.md).
         k = y + 1
         a1x = a1[0] + k * dir1[0]
         a1y = a1[1] + k * dir1[1]

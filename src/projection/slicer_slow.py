@@ -26,7 +26,7 @@ def slice_slow(M, pts):
     dir2 = (c - a2) / dac
 
     for y in range(rows):
-        # Step first, then sample (S1-2). No += so the original arrays stay safe.
+        # Step first, then sample (decision 6, docs/decisions.md). No += so the original arrays stay safe.
         a1 = a1 + dir1
         a2 = a2 + dir2
         d12 = np.linalg.norm(a2 - a1)  # length of the current row
@@ -35,7 +35,7 @@ def slice_slow(M, pts):
         # The 1e-9 keeps a whole-number d12 (like 8.0) from rounding down.
         n_points = int(np.floor(d12 + 1e-9)) + 1
         for x1 in range(n_points):
-            # Center the row in the image. floor(v + 0.5) rounds half up (S1-6).
+            # Center the row in the image. floor(v + 0.5) rounds half up (decision 7, docs/decisions.md).
             col = int(np.floor(dbc / 2 - d12 / 2 + x1 + 0.5))
             if col < 0 or col >= cols:
                 continue

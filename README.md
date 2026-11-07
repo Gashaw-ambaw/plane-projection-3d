@@ -36,7 +36,7 @@ Windows 11, Python 3.13.17 (developed and tested there). Packages (unpinned, `re
 - `data/` - `MRHead_1.nrrd` (256x256x130, int16), `ball.nrrd` (300^3, uint16, ball of radius 100), `Ex0.csv` (same content as the lecturer's `lecturer_example.csv`), `ball_rotate.csv`, `mrhead_rotate.csv`, `mrhead_sweep.csv`
 
 ## Docs and supplementary material
-[SRS](docs/SRS.md) - [algorithm](docs/algorithm.md) - [decisions](docs/decisions.md) - [testing](docs/testing.md) - [data](docs/data.md) - [experiment](docs/experiment/README.md) - [benchmarks](benchmarks/benchmarks.md) - [AI usage](AI_USAGE.md)
+[SRS](docs/SRS.md) - [algorithm](docs/algorithm.md) - [decisions](docs/decisions.md) - [testing](docs/testing.md) - [data](docs/data.md) - [output](docs/output.md) - [experiment](docs/experiment/README.md) - [benchmarks](benchmarks/benchmarks.md) - [AI usage](AI_USAGE.md)
 
 Speed: requirement 30 FPS, about 100 expected on a 500^3 volume. The FPS column below is slicing only, Numba path, clean runs of 2026-11-06 with CPU below 30%; setup, method and limits are in [docs/experiment/README.md](docs/experiment/README.md). The machine is noisy (a few percent to tens of percent); the history is in [benchmarks](benchmarks/benchmarks.md).
 

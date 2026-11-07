@@ -42,9 +42,9 @@ def expected_center_pixel(pts, center):
 
     The row is k_center - 1 and the column is x1_center - start, as in slice_slow.
     The result is half a pixel away from the middle of the image, because:
-    - a is not sampled (S1-2): row y is sampled after y + 1 steps, so the middle of
-      the plane is in row h - 1, not h - 0.5;
-    - the last column x1 = d12 is thrown away when d12 is a whole number (S1-5), so
+    - a is not sampled, decision 6 (docs/decisions.md): row y is sampled after y + 1 steps,
+      so the middle of the plane is in row h - 1, not h - 0.5;
+    - the last column x1 = d12 is thrown away when d12 is a whole number, decision 6, so
       the columns are x1 = 0..cols - 1 and the middle is in column h.
     """
     a1, a2, b, c = normalize_points(pts)
@@ -136,7 +136,7 @@ def test_ball_width_is_two_r(ball_volume, normal):
     assert width_error <= 3, f"normal={normal}: width error {width_error} px"
 
 
-# --- Small checks of S1-2, S1-4 and the volume dtype (fast version equals slow version) ---
+# --- Small checks of decisions 5 and 6 (docs/decisions.md) and the volume dtype (fast = slow) ---
 
 
 @pytest.mark.parametrize(
@@ -149,7 +149,7 @@ def test_ball_width_is_two_r(ball_volume, normal):
     ],
 )
 def test_non_whole_dbc_gives_ceil_columns_and_equals_slow(pts):
-    # S1-4: Dbc = 5.2 gives 6 columns.
+    # Decision 5 (docs/decisions.md): Dbc = 5.2 gives 6 columns.
     x, y, z = np.indices((12, 12, 12))
     M = x * 100 + y * 10 + z + 1
     a1, a2, b, c = normalize_points(pts)
@@ -161,7 +161,7 @@ def test_non_whole_dbc_gives_ceil_columns_and_equals_slow(pts):
 
 
 def test_the_voxel_of_a_is_not_read():
-    # S1-2: a steps before sampling, so the voxel of a itself is never read.
+    # Decision 6 (docs/decisions.md): a steps before sampling, so the voxel of a itself is never read.
     pts = [(2, 2, 2), (2, 7, 2), (7, 2, 2)]
     M = np.ones((12, 12, 12), dtype=np.uint16)
     M[2, 2, 2] = 9999

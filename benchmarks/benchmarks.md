@@ -46,7 +46,7 @@ The last row was measured in a separate session with a script that runs the sett
 
 `slice_volume` equals `slice_slow` exactly (`np.array_equal`) on the tests. Independent check: on the synthetic ball, the disk area is 0.9979 to 1.0005 of pi*100^2 over 60 planes (see `docs/experiment`).
 
-## Numba kernel vs NumPy fallback (S2-8)
+## Numba kernel vs NumPy fallback (decision 14, docs/decisions.md)
 
 Script: `benchmarks/bench_numba.py` (2 full runs, 10 rounds each; NumPy and Numba take turns inside every round, the order changes every round). FPS = `slice_volume` only, JIT compile excluded. Every number below is MEASURED on the same machine as above (i5-1235U, Python 3.13.17, numba 0.68.1, numpy 2.5.4).
 

@@ -27,7 +27,7 @@ def normalize_points(pts):
 
 
 def validate(a1, a2, b, c):
-    """Check that the points make a valid plane, or raise ValueError (S1-8).
+    """Check that the points make a valid plane, or raise ValueError (decision 9, docs/decisions.md).
 
     Rules from the lecturer's Q&A (EPS = 0.001): equal legs, dist(a1, a2) <= dist(b, c),
     and the four points on one plane. Two more rules are ours: Dab of at least 1 voxel
@@ -75,7 +75,7 @@ def validate(a1, a2, b, c):
 
 
 def output_shape(pts):
-    """Return (rows, cols) of the image for the plane in pts (S1-3, S1-4).
+    """Return (rows, cols) of the image for the plane in pts (decision 5, docs/decisions.md).
 
     It also validates the plane, so invalid input raises ValueError here, and so does an image
     with more than MAX_IMAGE_SIDE rows or columns.
